@@ -23,9 +23,6 @@ echo "✅ Node.js $(node -v) detected"
 echo "📦 Installing dependencies..."
 npm install
 
-# Create necessary directories if they don't exist
-mkdir -p public/assets
-
 # Check if the installation was successful
 if [ $? -eq 0 ]; then
     echo "✅ Dependencies installed successfully"
@@ -33,6 +30,9 @@ else
     echo "❌ Failed to install dependencies"
     exit 1
 fi
+
+# Create necessary directories if they don't exist
+mkdir -p public/assets
 
 # Set up git hooks if git is installed
 if command -v git &> /dev/null; then
@@ -44,6 +44,18 @@ if command -v git &> /dev/null; then
     # Create pre-commit hook
     cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
+
+# Skip linting if the command doesn't exist (during setup)
+if ! command -v npx &> /dev/null; then
+    echo "⚠️ Skipping linting check as npx is not available."
+    exit 0
+fi
+
+# Skip linting if next is not installed yet
+if ! npx next --version &> /dev/null; then
+    echo "⚠️ Skipping linting check as Next.js is not installed yet."
+    exit 0
+fi
 
 # Run linting before commit
 echo "Running linting check..."
