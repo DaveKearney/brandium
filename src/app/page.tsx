@@ -55,7 +55,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  The Element that Empowers Phenomenal Brands
+                  Empowering Phenomenal Brands
                 </h1>
                 <p className="text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Brandium.ai helps you build your brand, analyze your market, and create engaging content—all in one
