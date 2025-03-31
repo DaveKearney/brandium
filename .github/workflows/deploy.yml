@@ -5,63 +5,57 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
+  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Create temporary directory for public site
-        run: |
-          mkdir -p /tmp/brandium-public/src/app
-          cp -r public /tmp/brandium-public/
-          cp -r src/app/about /tmp/brandium-public/src/app/
-          cp -r src/app/contact /tmp/brandium-public/src/app/
-          cp -r src/app/features /tmp/brandium-public/src/app/
-          cp -r src/app/layout.tsx /tmp/brandium-public/src/app/
-          cp -r src/app/page.tsx /tmp/brandium-public/src/app/
-          cp -r src/app/pricing /tmp/brandium-public/src/app/
-          cp -r src/app/privacy /tmp/brandium-public/src/app/
-          cp -r src/app/terms /tmp/brandium-public/src/app/
-          cp -r src/components /tmp/brandium-public/src/
-          mkdir -p /tmp/brandium-public/src/lib
-          cp -r src/lib/* /tmp/brandium-public/src/lib/ || true
-          mkdir -p /tmp/brandium-public/src/styles
-          cp -r src/styles/* /tmp/brandium-public/src/styles/ || true
-          cp package.json package-lock.json next.config.mjs postcss.config.js tailwind.config.js tsconfig.json /tmp/brandium-public/
-          echo "www.brandium.cc" > /tmp/brandium-public/public/CNAME
-
+      
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
-          cache-dependency-path: /tmp/brandium-public/package-lock.json
-
+          node-version: "20"
+          cache: 'npm'
+      
       - name: Setup Pages
-        id: pages
         uses: actions/configure-pages@v4
-
+        
       - name: Install dependencies
-        run: cd /tmp/brandium-public && npm ci
-
+        run: npm ci
+        
+      - name: Create CNAME file
+        run: echo "www.brandium.cc" > ./public/CNAME
+      
+      # Move dashboard dir temporarily to avoid build issues
+      - name: Prepare website-only build
+        run: |
+          rm -rf src/app/dashboard || true
+          rm -rf Spec || true
+      
       - name: Build with Next.js
-        run: cd /tmp/brandium-public && npm run build
-
-      - name: Create .nojekyll file
-        run: touch /tmp/brandium-public/out/.nojekyll
-
+        run: |
+          npx next build
+          touch out/.nojekyll
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: /tmp/brandium-public/out
+          path: ./out
 
+  # Deployment job
   deploy:
     environment:
       name: github-pages
