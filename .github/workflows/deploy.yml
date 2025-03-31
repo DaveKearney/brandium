@@ -7,83 +7,68 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Create temporary directory for public site
+        run: |
+          mkdir -p /tmp/brandium-public/src/app
+          cp -r public /tmp/brandium-public/
+          cp -r src/app/about /tmp/brandium-public/src/app/
+          cp -r src/app/contact /tmp/brandium-public/src/app/
+          cp -r src/app/features /tmp/brandium-public/src/app/
+          cp -r src/app/layout.tsx /tmp/brandium-public/src/app/
+          cp -r src/app/page.tsx /tmp/brandium-public/src/app/
+          cp -r src/app/pricing /tmp/brandium-public/src/app/
+          cp -r src/app/privacy /tmp/brandium-public/src/app/
+          cp -r src/app/terms /tmp/brandium-public/src/app/
+          cp -r src/components /tmp/brandium-public/src/
+          mkdir -p /tmp/brandium-public/src/lib
+          cp -r src/lib/* /tmp/brandium-public/src/lib/ || true
+          mkdir -p /tmp/brandium-public/src/styles
+          cp -r src/styles/* /tmp/brandium-public/src/styles/ || true
+          cp package.json package-lock.json next.config.mjs postcss.config.js tailwind.config.js tsconfig.json /tmp/brandium-public/
+          echo "www.brandium.cc" > /tmp/brandium-public/public/CNAME
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: npm
+          cache-dependency-path: /tmp/brandium-public/package-lock.json
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
 
       - name: Install dependencies
-        run: npm ci
+        run: cd /tmp/brandium-public && npm ci
 
-      - name: Create necessary files
-        run: |
-          mkdir -p src/components/ui
-          if [ ! -f "src/components/ui/tabs.tsx" ]; then
-            cp src/components/ui/button.tsx src/components/ui/tabs.tsx || true
-          fi
-          if [ ! -f "src/components/ui/badge.tsx" ]; then
-            cp src/components/ui/button.tsx src/components/ui/badge.tsx || true
-          fi
+      - name: Build with Next.js
+        run: cd /tmp/brandium-public && npm run build
 
-      - name: Create badge.tsx if missing
-        run: |
-          if [ ! -f "src/components/ui/badge.tsx" ]; then
-            echo '"use client";
-            
-            import * as React from "react";
-            import { cva, type VariantProps } from "class-variance-authority";
-            
-            import { cn } from "@/lib/utils";
-            
-            const badgeVariants = cva(
-              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-              {
-                variants: {
-                  variant: {
-                    default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-                    secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-                    destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-                    outline: "text-foreground",
-                  },
-                },
-                defaultVariants: {
-                  variant: "default",
-                },
-              }
-            );
-            
-            export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
-            
-            function Badge({ className, variant, ...props }: BadgeProps) {
-              return (
-                <div className={cn(badgeVariants({ variant }), className)} {...props} />
-              );
-            }
-            
-            export { Badge, badgeVariants };' > src/components/ui/badge.tsx
-          fi
+      - name: Create .nojekyll file
+        run: touch /tmp/brandium-public/out/.nojekyll
 
-      - name: Hide dashboard and spec directories temporarily
-        run: |
-          rm -rf src/app/dashboard Spec || true
-
-      - name: Build website
-        run: |
-          npm run build
-          touch out/.nojekyll
-          echo "www.brandium.cc" > out/CNAME
-
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: out
-          branch: gh-pages
+          path: /tmp/brandium-public/out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
