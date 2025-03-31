@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Hide dashboard temporarily
+        run: |
+          mkdir -p _backup
+          mv src/app/dashboard _backup/ || true
+          mv Spec _backup/ || true
+
+      - name: Build website
+        run: |
+          npm run build
+          touch out/.nojekyll
+          echo "www.brandium.cc" > out/CNAME
+
+      - name: Restore backed up files
+        run: |
+          mkdir -p src/app
+          mv _backup/dashboard src/app/ || true
+          mv _backup/Spec ./ || true
+          rm -rf _backup
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out
+          branch: gh-pages

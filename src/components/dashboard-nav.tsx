@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  Brand,
+  Briefcase,
   LineChart,
   MessageSquare,
   Layers,
@@ -30,7 +30,7 @@ export function DashboardNav() {
     {
       title: "Brand",
       href: "/dashboard/brand",
-      icon: <Brand className="h-5 w-5" />,
+      icon: <Briefcase className="h-5 w-5" />,
     },
     {
       title: "Vision",
