@@ -148,8 +148,8 @@ export default function AboutPage() {
               <div className="flex flex-col items-center space-y-4 rounded-lg bg-white p-6 shadow-sm">
                 <div className="h-24 w-24 rounded-full bg-[#F4F7F9]"></div>
                 <div className="space-y-1 text-center">
-                  <h3 className="text-xl font-bold">Sarah Johnson</h3>
-                  <p className="text-sm text-gray-500">CEO & Co-Founder</p>
+                  <h3 className="text-xl font-bold">Dave Kearney</h3>
+                  <p className="text-sm text-gray-500">CEO & Founder</p>
                 </div>
                 <p className="text-center text-gray-500">
                   Former CMO with 15+ years of experience in digital marketing and brand strategy.

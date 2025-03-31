@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Brandium - The Element that Empowers Phenomenal Brands',
-  description: 'Brandium.ai helps you build your brand, analyze your market, and create engaging content—all in one platform.',
+  title: 'Brandium - Empowering Phenomenal Brands',
+  description: 'Brandium helps you build your brand, analyze your market, and create engaging content—all in one platform.',
 };
 
 export default function RootLayout({

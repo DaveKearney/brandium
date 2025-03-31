@@ -29,9 +29,9 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Sarah Connor</p>
+            <p className="text-sm font-medium leading-none">Dave Kearney</p>
             <p className="text-xs leading-none text-muted-foreground">
-              sarah@example.com
+              dave@brandium.cc
             </p>
           </div>
         </DropdownMenuLabel>
